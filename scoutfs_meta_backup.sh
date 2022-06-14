@@ -4,8 +4,8 @@
 source scoutfs_dump_config
 
 ## Prep the log area
-mkdir -p /var/log/scoutfs
-log_file=/var/log/scoutfs/meta_backup.$(date +%Y-%m-%d_%H-%M-%S).log
+mkdir -p ${meta_backup_dir}/logs
+log_file=${meta_backup_dir}/logs/meta_backup.$(date +%Y-%m-%d_%H-%M-%S).log
 
 ## Dump the metadata
 /usr/bin/samcli fs dump -f ${meta_backup_dir}/mnt.scoutfs.FSmeta.dump.$(date +%Y-%m-%d_%H-%M-%S) -r ${fs_mount_path} > "${log_file}" 2>&1
