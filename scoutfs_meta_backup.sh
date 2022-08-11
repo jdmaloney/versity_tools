@@ -1,11 +1,19 @@
 #!/bin/bash
 
+## Manager check, if not manager, abort
+me=$HOSTNAME
+manager=$(samcli system | grep "scheduler name" | cut -d':' -f 2 | sed 's/\ //g')
+
+if [ "${me}" != "${manager}" ]; then
+	exit 0
+fi
+
 ## Configure
-source scoutfs_dump_config
+source /root/tools/scripts/scoutfs_dump_config
 
 ## Prep the log area
-mkdir -p ${meta_backup_dir}/logs
-log_file=${meta_backup_dir}/logs/meta_backup.$(date +%Y-%m-%d_%H-%M-%S).log
+mkdir -p ${log_dir}
+log_file=${log_dir}/meta_backup.$(date +%Y-%m-%d_%H-%M-%S).log
 
 ## Dump the metadata
 /usr/bin/samcli fs dump -f ${meta_backup_dir}/mnt.scoutfs.FSmeta.dump.$(date +%Y-%m-%d_%H-%M-%S) -r ${fs_mount_path} > "${log_file}" 2>&1
@@ -34,6 +42,6 @@ else
 	esac
 
 	## Ship to InfluxDB
-	curl -u ${influxdb_username}:${influxdb_password} -i -XPOST "https://${influxdb_server}:8086/write?db=${influxdb_database}" --data-binary "scoutfs_meta_backup,fs_mount=${fs_mount_path} success=1,files=${files},dirs=${dirs},run_time=${final_time},rate=${rate},unflushed_files=${unflushed_files}"
+#	curl -u ${influxdb_username}:${influxdb_password} -i -XPOST "https://${influxdb_server}:8086/write?db=${influxdb_database}" --data-binary "scoutfs_meta_backup,fs_mount=${fs_mount_path} success=1,files=${files},dirs=${dirs},run_time=${final_time},rate=${rate},unflushed_files=${unflushed_files}"
 
 fi
